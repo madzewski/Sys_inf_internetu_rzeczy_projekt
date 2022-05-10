@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>IOF</title>
+<meta http-equiv="refresh" content={{delay}}>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <div id="header">
+        <div class="header"><h4>Temperatura</h4></div>
+        <div class="header"><h4>Wilgotność</h4></div>
+        <div class="header"><h4>CO2</h4></div>
+        <div class="header"><h4>Gaz</h4></div>
+        <div class="header"><h4>Czad</h4></div>
+    </div>
+    <div id="status">
+        {% for i in range(1,6) %}
+        <div class="menu_box">
+            <div class="inside_menu_box">
+             <form action="/activate/{{ i }}" method="POST">
+                 <input type="radio" id="on" name="state{{ i }}" value="on" required>
+                 <label>ON</label><br>
+                 <input type="radio" id="off" name="state{{ i }}" value="off" required>
+                 <label>OFF</label><br>
+                 <input type="submit" value="Wyślij">
+             </form>
+            </div>
+            <div class="inside_menu_box">
+             <form action="/method/{{ i }}" method="POST">
+                 <input type="radio" id="http" name="method{{ i }}" value="http" required>
+                 <label>HTTP</label><br>
+                 <input type="radio" id="mqtt" name="method{{ i }}" value="mqtt" required>
+                 <label>MQTT</label><br>
+                 <input type="submit" value="Wyślij">
+             </form>
+            </div>
+            <div class="inside_menu_box">
+             <form action="/update/{{ i }}" method="POST">
+                 <input type="text" name="interval{{ i }}" id="int_box" required><br/>
+                 <input type="submit" value="Wyślij">
+             </form>
+            </div>
+            <div class="inside_menu_long_box">
+                {% for key in state %}
+                    {% if key == i %}
+                        {% for n in state[key] %}
+                            {{ n }} : {{ state[key][n] }} <br/>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="summary">
+        <p id="sum_text">
+            {% for text in summary_text %}
+                {{ text }} <br/>
+            {% endfor %}
+        </p>
+        <div class="summary_box">
+            <h3>Nawilżacz - status: {{humidifier_state}}</h3>
+            {% if decision_module_state == 'off' %}
+            <form action="/humidifier" method="POST">
+                 <input type="radio" id="on" name="humidifier" value="on" required>
+                 <label>ON</label><br>
+                 <input type="radio" id="off" name="humidifier" value="off" required>
+                 <label>OFF</label><br>
+                 <input type="submit" value="Wyślij">
+             </form>
+            {% endif %}
+        </div>
+        <div class="summary_box">
+            <h3>Grzejnik - status: {{heater_state}}</h3>
+            {% if decision_module_state == 'off' %}
+            <form action="/heater" method="POST">
+                 <input type="radio" id="on" name="heater" value="on" required>
+                 <label>ON</label><br>
+                 <input type="radio" id="off" name="heater" value="off" required>
+                 <label>OFF</label><br>
+                 <input type="submit" value="Wyślij">
+             </form>
+            {% endif %}
+        </div>
+        <div class="summary_box">
+            <h3>Automat - status: {{decision_module_state}}</h3>
+            <form action="/decision_status" method="POST">
+                 <input type="radio" id="on" name="decision_status" value="on" required>
+                 <label>ON</label><br>
+                 <input type="radio" id="off" name="decision_status" value="off" required>
+                 <label>OFF</label><br>
+                 <input type="submit" value="Wyślij">
+             </form>
+        </div>
+        <div class="summary_box">
+            <h3>Zmiana czasu liczenia średniej</h3>
+            <form action="/delay" method="POST">
+                 <input type="text" name="delay" id="delay" required><br/>
+                 <input type="submit" value="Wyślij">
+             </form>
+        </div>
+    </div>
+    <div id="download_box">
+        <h3>Zapis bazy</h3>
+        <form action="/download" method="POST">
+            <label for="save_method">Format:</label>
+            <select id="save_method" name="save_method">
+                <option value="csv">csv</option>
+                <option value="json">json</option>
+            </select><br/>
+            <label for="source">Źródło danych:</label>
+            <select id="source" name="source">
+                <option value="temperatura">temperatura</option>
+                <option value="wilgotnosc%">wilgotnosc</option>
+                <option value="co2">co2</option>
+                <option value="gaz">gaz</option>
+                <option value="czad">czad</option>
+            </select><br/>
+            <label for="date_from">Od:</label>
+                <input type="date" id="date_from" name="date_from" value="2019-07-05" min="2019-07-05">
+                <input type="time" id="time_from" name="time_from" value="00:00"><br/>
+            <label for="date_to">Do:</label>
+                <input type="date" id="date_to" name="date_to" value="2019-07-05" min="2019-07-05">
+                <input type="time" id="time_to" name="time_to" value="00:00"><br/>
+            <label for="plot">Rysuj</label>
+                <select id="plot" name="plot">
+                    <option value="off">Nie</option>
+                    <option value="on" >Tak</option>
+                </select><br/>
+            <input type="submit" value="Generuj">
+        </form>
+    </div>
+         <img src='{{plot_image}}'>
+</div>
+{% endblock %}
